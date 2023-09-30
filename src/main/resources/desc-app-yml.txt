@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: catalog-service O nome do aplicativo, usado pelo servidor de configuração para filtrar a configuração
+  config:
+    import: "optional:configserver:" Importa dados de configuração de um servidor de configuração quando disponível
+  cloud:
+    config:
+      uri: http://localhost:8888 A URL do servidor de configuração
+
+1 - O nome do aplicativo, usado pelo servidor de configuração para filtrar a configuração
+2 - Importa dados de configuração de um servidor de configuração quando disponível
+3 -  A URL do servidor de configuração
+
+      request-connect-timeout: 5000 - controlar  o limite de tempo estabelecer uma conexão com o servidor de configuração.
+      request-read-timeout: 5000 -  timeout permite limitar o tempo gasto na leitura de dados de configuração do servidor.
+      fail-fast: true Faz com que uma falha na conexão com o servidor de configuração seja fatal
+      retry:
+        max-attempts: 6 - Número máximo de tentativas
+        initial-interval: - 1000 Intervalo de nova tentativa inicial para espera (ms)
+        max-interval: 2000 - Intervalo máximo de novas tentativas para espera (ms)
+        multiplier: 1.1 -  Multiplicador para calcular o próximo intervalo
+
+
+Expõe o endpoint /actuator/refresh por meio de HTTP
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
+
+para atualizar as configurações nas aplicações é necessario enviar um POST
+Vá em frente e envie uma solicitação POST para o aplicativo Catalog Service no endpoint /actuator/refresh
+http POST:9001/actuator/refresh
+
+Bom trabalho! Você acabou de atualizar a configuração de uma aplicação em tempo de
+execução sem reiniciá-la, sem reconstruir a aplicação e garantindo a rastreabilidade das
+alterações. É perfeito para a nuvem. No capítulo 14, você aprenderá técnicas mais
+avançadas para gerenciar configurações necessárias na produção, incluindo gerenciamento
+de segredos, ConfigMaps e Secrets.
+
+
+    hikari:
+      connection-timeout: 2000ms #ms
+      maximum-pool-size: 5
+
+      Abrir e fechar conexões de banco de dados são operações relativamente caras, então
+      você não quer fazer isso toda vez que seu aplicativo acessa dados. A solução é o pooling
+      de conexões: a aplicação estabelece diversas conexões com o banco de dados e as
+      reutiliza, em vez de criar novas para cada operação de acesso aos dados. Esta é uma
+      otimização de desempenho considerável.
+      Spring Boot usa HikariCP para pool de conexões e você pode configurá-lo a partir do
+      arquivo application.yml. Você deseja configurar pelo menos uma conexão (tempo limite
+      spring.datasource.hikari.connection timeout) e um número máximo de conexões no pool
+      (spring.datasource.hikari.maximum-pool-size), porque ambos afetam a resiliência e o
+      desempenho do aplicativo.
+      Como você viu no pool de threads do Tomcat, vários fatores influenciam quais valores você
+      deve usar. Como ponto de partida, você pode consultar a análise HikariCP de
+      dimensionamento de pool (https://github.com/brettwooldridge/HikariCP/wiki/About-Pool
+      Sizing).
